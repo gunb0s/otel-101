@@ -1,0 +1,5 @@
+# default user and password to Grafana
+adminUser: admin
+adminPassword: admin
+
+replicas: 1

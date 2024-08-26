@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: "2024-08-26T05:35:24Z"
+  labels:
+    kubernetes.io/metadata.name: alloy
+  name: alloy
+  resourceVersion: "729770"
+  uid: 229d5122-1a03-45d1-81ab-ee69d80c76d4
+spec:
+  finalizers:
+  - kubernetes
+status:
+  phase: Active

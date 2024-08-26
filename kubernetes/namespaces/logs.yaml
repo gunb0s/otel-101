@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: "2024-08-26T05:21:00Z"
+  labels:
+    kubernetes.io/metadata.name: logs
+  name: logs
+  resourceVersion: "726389"
+  uid: f3ebb7fd-269d-4f7f-9d37-9d956c85d44c
+spec:
+  finalizers:
+  - kubernetes
+status:
+  phase: Active

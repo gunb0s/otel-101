@@ -1,0 +1,7 @@
+### Create order
+POST http://localhost:3001/orders
+Content-Type: application/json
+
+{
+  "requestId": "{{$random.uuid}}"
+}

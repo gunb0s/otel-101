@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: lambda256
+  labels:
+    ctx: otel101
+    app: otel101-api-server
+  name: otel101-api-server
+spec:
+  selector:
+    matchLabels:
+      ctx: otel101
+      app: otel101-api-server
+  template:
+    metadata:
+      labels:
+        ctx: otel101
+        app: otel101-api-server
+    spec:
+      containers:
+        - image: gunbos/otel101-api-server:latest
+          name: otel101-api-server

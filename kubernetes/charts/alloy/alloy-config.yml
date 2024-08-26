@@ -1,0 +1,83 @@
+apiVersion: v1
+data:
+  config.alloy: |
+    logging {
+      level = "info"
+      format = "logfmt"
+    }
+    discovery.kubernetes "pods" {
+      role = "pod"
+      namespaces {
+        own_namespace = true
+        names = ["lambda256", "default"]
+      }
+    }
+
+    discovery.relabel "pods" {
+      targets = discovery.kubernetes.pods.targets
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        action = "replace"
+        target_label = "namespace"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_name"]
+        action = "replace"
+        target_label = "pod"
+      }
+    }
+
+    loki.source.kubernetes "pods" {
+      targets = discovery.relabel.pods.output
+      forward_to = [loki.process.process.receiver]
+    }
+
+    loki.process "process" {
+      forward_to = [loki.write.loki.receiver]
+    }
+
+    loki.write "loki" {
+     endpoint {
+       url = "http://loki-gateway.logs:80/loki/api/v1/push"
+     }
+    }
+
+    otelcol.receiver.otlp "default" {
+      grpc {}
+
+      http {}
+
+      output {
+        traces = [otelcol.processor.k8sattributes.default.input]
+      }
+    }
+
+    otelcol.processor.k8sattributes "default" {
+      extract {
+        metadata = [
+          "k8s.namespace.name",
+          "k8s.pod.name",
+          "k8s.container.name",
+        ]
+      }
+
+      output {
+        traces = [otelcol.exporter.otlp.tempo.input]
+      }
+    }
+
+    otelcol.exporter.otlp "tempo" {
+      client {
+        endpoint = "tempo-distributor.traces:4317"
+        tls {
+            insecure             = true
+            insecure_skip_verify = true
+        }
+      }
+    }
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: alloy-config
+  namespace: alloy

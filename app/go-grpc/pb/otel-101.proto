@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package otel101;
+option go_package = "github.com/gunb0s/otel-101/go-grpc/otel101";
+
+// -------------Payment service-----------------
+service PaymentService {
+  rpc Charge(ChargeRequest) returns (ChargeResponse) {}
+}
+
+message ChargeRequest {
+  int32 amount = 1;
+}
+
+message ChargeResponse {
+  string transaction_id = 1;
+}
+
+// ---------------Delivery Service----------
+service DeliveryService {
+  rpc DeliveryOrder(DeliveryOrderRequest) returns (DeliveryOrderResponse) {}
+  rpc DeliveryInquiry(DeliveryInquiryRequest) returns (DeliveryInquiryResponse) {}
+}
+
+message DeliveryOrderRequest {
+  string address = 1;
+}
+
+message DeliveryOrderResponse {
+  string tracking_id = 1;
+}
+
+message DeliveryInquiryRequest {
+  string tracking_id = 1;
+}
+
+message DeliveryInquiryResponse {
+  string status = 1;
+}
