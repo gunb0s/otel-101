@@ -11,6 +11,7 @@ import { ChargeRequest, ChargeResponse } from '../pb/otel-101';
 import { Observable } from 'rxjs';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
+import { context, trace } from '@opentelemetry/api';
 
 export interface PaymentService {
   Charge(request: ChargeRequest): Observable<ChargeResponse>;
@@ -52,9 +53,16 @@ export class OrderController implements OnModuleInit {
     // this.logger.log(
     //   `Payment service response: txId=${chargeResponse.transactionId}`,
     // );
+    this.internalCall();
+
+    const span = trace.getSpan(context.active());
+    const spanContext = span?.spanContext();
 
     const job = await this.ordersQueue.add('order_info', {
       requestId: createOrderDto.requestId,
+      traceId: spanContext?.traceId,
+      spanId: spanContext?.spanId,
+      traceFlags: spanContext?.traceFlags,
     });
 
     this.logger.log(`Order created: ${createOrderDto.requestId}`);
@@ -64,5 +72,9 @@ export class OrderController implements OnModuleInit {
       status: 'OK',
       job: job.id,
     };
+  }
+
+  internalCall() {
+    this.logger.log('Internal call');
   }
 }
