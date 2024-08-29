@@ -8,7 +8,9 @@ import {
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { ChargeRequest, ChargeResponse } from '../pb/otel-101';
-import { lastValueFrom, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 export interface PaymentService {
   Charge(request: ChargeRequest): Observable<ChargeResponse>;
@@ -22,6 +24,7 @@ export class OrderController implements OnModuleInit {
     // @Inject(EventQueueClientConst.KAFKA)
     // private readonly customKafkaClient: EventQueueClient,
     @Inject('GRPC_CLIENT') private client: ClientGrpc,
+    @InjectQueue('orders') private readonly ordersQueue: Queue,
   ) {}
 
   onModuleInit() {
@@ -32,6 +35,7 @@ export class OrderController implements OnModuleInit {
   @Post()
   async createOrder(@Body() createOrderDto: { requestId: string }): Promise<{
     requestId: string;
+    job: number | string;
     status: string;
   }> {
     // await this.customKafkaClient.send('orders', [
@@ -42,16 +46,23 @@ export class OrderController implements OnModuleInit {
     //   },
     // ]);
 
-    const chargeResponse = await lastValueFrom(
-      this.paymentService.Charge({ amount: 1000 }),
-    );
-    this.logger.log(
-      `Payment service response: txId=${chargeResponse.transactionId}`,
-    );
+    // const chargeResponse = await lastValueFrom(
+    //   this.paymentService.Charge({ amount: 1000 }),
+    // );
+    // this.logger.log(
+    //   `Payment service response: txId=${chargeResponse.transactionId}`,
+    // );
+
+    const job = await this.ordersQueue.add('order_info', {
+      requestId: createOrderDto.requestId,
+    });
+
+    this.logger.log(`Order created: ${createOrderDto.requestId}`);
 
     return {
       requestId: createOrderDto.requestId,
       status: 'OK',
+      job: job.id,
     };
   }
 }
