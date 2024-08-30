@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: lambda256
+  labels:
+    ctx: otel101
+    app: bullq-consumer
+  name: bullq-consumer
+spec:
+  selector:
+    matchLabels:
+      ctx: otel101
+      app: bullq-consumer
+  template:
+    metadata:
+      labels:
+        ctx: otel101
+        app: bullq-consumer
+    spec:
+      containers:
+        - image: gunbos/bullq-consumer:latest
+          name: bullq-consumer
