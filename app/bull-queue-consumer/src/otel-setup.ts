@@ -6,20 +6,16 @@ import {
   SEMRESATTRS_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import {
-  BatchSpanProcessor,
-  ConsoleSpanExporter,
-} from '@opentelemetry/sdk-trace-node';
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node';
 import { BullInstrumentation } from '@useparagon/opentelemetry-instrumentation-bull';
 import { NestInstrumentation } from '@opentelemetry/instrumentation-nestjs-core';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { RedisInstrumentation } from '@opentelemetry/instrumentation-redis';
+import { IORedisInstrumentation } from '@opentelemetry/instrumentation-ioredis';
+import { PinoInstrumentation } from '@opentelemetry/instrumentation-pino';
+import { MySQL2Instrumentation } from '@opentelemetry/instrumentation-mysql2';
 
 const traceExporter = new OTLPTraceExporter({
   url: 'http://alloy.alloy:4318/v1/traces',
 });
-
-const consoleTraceExporter = new ConsoleSpanExporter();
 
 const sdk = new NodeSDK({
   resource: new Resource({
@@ -35,10 +31,11 @@ const sdk = new NodeSDK({
   //   exportIntervalMillis: 1000,
   // }),
   instrumentations: [
-    getNodeAutoInstrumentations(),
+    new PinoInstrumentation(),
     new NestInstrumentation(),
     new BullInstrumentation(),
-    new RedisInstrumentation(),
+    new IORedisInstrumentation(),
+    new MySQL2Instrumentation(),
   ],
 });
 

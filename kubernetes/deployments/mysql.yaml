@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel101-mysql
+  namespace: lambda256
+  labels:
+    app: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0.31 # 원하는 MySQL 버전으로 설정
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "root" # root 사용자 비밀번호
+            - name: MYSQL_DATABASE
+              value: "otel101" # 생성할 기본 데이터베이스 이름
+          ports:
+            - containerPort: 3306
